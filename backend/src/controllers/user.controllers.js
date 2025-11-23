@@ -1,5 +1,4 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+
 import {User} from '../models/user.models.js'
 import {asyncHandler}from '../utils/asyncHandler.js';
 import {ApiError} from '../utils/ApiError.js';
@@ -26,7 +25,7 @@ const generateAccessAndRefreshTokens =async (userId) => {
   }
 }
 
-const singup =asyncHandler( async(req, res) =>{
+const signup =asyncHandler( async(req, res) =>{
      const { username, email, password, role = 'user' } = req.body;
 
       // 1. Validation
@@ -105,8 +104,30 @@ const login = asyncHandler(async (req,res) => {
   );
 });
 
+const logout= asyncHandler(async (req,res) => {
+    await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { refreshToken: null } },
+    { new: true }
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production"
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged out successfully"));
+    
+})
+
 
 
 export {
-  singup
+  signup,
+  login,
+  logout
 }
