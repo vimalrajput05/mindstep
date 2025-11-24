@@ -19,4 +19,9 @@ import authRoutes from "./routes/user.routes.js"
 
 app.use("/api/auth", authRoutes);
 
+import noteRoutes from "./routes/note.routes.js";
+
+app.use("/api/notes", noteRoutes);
+
+
 export { app };
