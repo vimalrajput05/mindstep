@@ -124,10 +124,29 @@ const logout= asyncHandler(async (req,res) => {
     
 })
 
+const uploadProfilePic = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (!req.file?.path) {
+    throw new ApiError(400, "No image file uploaded");
+  }
+
+  user.profilePic = req.file.path; // Cloudinary URL
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { profilePic: user.profilePic }, "Profile picture uploaded successfully"));
+});
+
 
 
 export {
   signup,
   login,
-  logout
+  logout,
+  uploadProfilePic
 }

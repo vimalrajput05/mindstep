@@ -23,7 +23,11 @@ const eventSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
-  }
+  },
+   image: {
+    type:String,
+    default:null
+   }, 
 }, { timestamps: true });
 
 export const Event = mongoose.model('Event',eventSchema);

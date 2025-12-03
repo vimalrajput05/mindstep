@@ -75,3 +75,21 @@ export const deleteEvent = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Event deleted successfully"));
 });
 
+export const uploadEventImage = asyncHandler(async (req, res) => {
+  const event = await Event.findById(req.params.id);
+  if (!event) {
+    throw new ApiError(404, "Event not found");
+  }
+
+  if (!req.file?.path) {
+    throw new ApiError(400, "No image file uploaded");
+  }
+
+  event.image = req.file.path; // Cloudinary URL
+  await event.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { eventImage: event.image }, "Event image uploaded successfully"));
+}); 
+

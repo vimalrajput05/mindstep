@@ -31,8 +31,12 @@ const userSchema= new mongoose.Schema({
          refreshToken:{
             type:String,
             default:null
-         }
-
+         },
+         profilePic: {
+    type: String, // Cloudinary URL for profile photo
+    default: null,
+  },
+       
 },{timestamps:true});
 
 
