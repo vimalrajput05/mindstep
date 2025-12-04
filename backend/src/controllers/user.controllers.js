@@ -3,6 +3,9 @@ import {User} from '../models/user.models.js'
 import {asyncHandler}from '../utils/asyncHandler.js';
 import {ApiError} from '../utils/ApiError.js';
 import {ApiResponse} from '../utils/ApiResponse.js';
+import {sendEmail} from '../utils/sendemail.js';
+
+import { welcomeTemplate } from '../templates/welcome.js';
 
 const generateAccessAndRefreshTokens =async (userId) => {
   try {
@@ -51,6 +54,16 @@ const signup =asyncHandler( async(req, res) =>{
 
   // 4. Generate JWT
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+
+  // send welocme email
+
+    try {
+    await sendEmail(user.email, "Welcome to Mindstep 🎉", welcomeTemplate);
+    console.log("✅ Welcome email sent to:", user.email);
+  } catch (err) {
+    console.error("❌ Error sending welcome email:", err);
+    // Note: Don't throw error here, signup should still succeed
+  }
 
   // 5. Response (never send password)
   return res.status(201).json(
