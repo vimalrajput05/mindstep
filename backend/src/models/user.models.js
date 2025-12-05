@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import bcrypt  from "bcryptjs";
 import jwt from "jsonwebtoken"
 const userSchema= new mongoose.Schema({
+
+    // Required at signup
     username:{
         type:String,
         required:true,
@@ -12,30 +14,57 @@ const userSchema= new mongoose.Schema({
         type:String,
         required:true,
         unique:true,
-        trim:true
+        trim:true,
+        lowercase:true
     },
     password:{
         type:String,
         required:true, 
+        minlength:6
     },
+
+     // Profile related (optional, editable later)
+    bio: {
+      type: String,
+       trim: true,
+      maxlength: 200,
+    },
+    phone: {
+      type: String,
+      trim: true,
+    },
+    location: {
+      type: String,
+      trim: true,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+    },
+    profilePic: {
+      type: String, // Cloudinary URL
+      default: "https://res.cloudinary.com/demo/image/upload/default-avatar.png",
+    },
+    coverImage: {
+      type: String, // Optional banner image
+    },
+
+     //  System fields
+
     role:{
         type:String,
         enum:["user","admin"],
         default:"user",
 
     },
-     createdAt: {
-         type: Date,
-        default: Date.now
-         },
-         refreshToken:{
-            type:String,
-            default:null
-         },
-         profilePic: {
-    type: String, // Cloudinary URL for profile photo
-    default: null,
-  },
+      plan: {
+      type: String,
+      enum: ["free", "premium"],
+      default: "free",
+    },
+    planExpiresAt: {
+      type: Date,
+    },
        
 },{timestamps:true});
 

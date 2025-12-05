@@ -7,6 +7,8 @@ import {sendEmail} from '../utils/sendemail.js';
 
 import { welcomeTemplate } from '../templates/welcome.js';
 
+import cloudinary from '../utils/cloudinary.js'
+
 const generateAccessAndRefreshTokens =async (userId) => {
   try {
       const user= await User.findById(userId)
@@ -155,11 +157,65 @@ const uploadProfilePic = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { profilePic: user.profilePic }, "Profile picture uploaded successfully"));
 });
 
+ const getMe = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id).select("-password");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User profile fetched successfully"));
+});
+
+const updateProfile = asyncHandler(async (req, res) => {
+  const allowedFields = ["name", "email", "bio", "phone", "location"];
+  const updates = {};
+
+  allowedFields.forEach((field) => {
+    if (req.body[field]) updates[field] = req.body[field];
+  });
+
+  // Email unique check
+  if (updates.email) {
+    const existingUser = await User.findOne({ email: updates.email });
+    if (existingUser && existingUser._id.toString() !== req.user.id) {
+      throw new ApiError(400, "Email already taken");
+    }
+  }
+
+  const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true }).select("-password");
+  return res
+  .status(200)
+    .json(new ApiResponse(200, user, "Profile updated successfully"));
+});
+
+const updateAvatar = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, "No file uploaded");
+  }
+
+  const result = await cloudinary(req.file.path);
+
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { profilePic: result.secure_url },
+    { new: true }
+  ).select("-password");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Profile photo updated successfully"));
+});
+
+
 
 
 export {
   signup,
   login,
   logout,
-  uploadProfilePic
+  uploadProfilePic,
+  getMe,
+  updateProfile,
+  updateAvatar
 }
